@@ -3,6 +3,7 @@
 #include <stdbool.h>
 
 #include "SDL2/SDL.h"
+#include "dynamics.h"
 
 #define WIN_WIDTH 800
 #define WIN_HEIGHT 600
@@ -14,25 +15,6 @@ struct {
     SDL_Renderer* renderer;
     bool quit;
 } state;
-
-
-typedef struct {
-    float x;
-    float y;
-} v2;
-
-
-typedef struct {
-    v2 pos;
-    v2 velocity;
-} RigidBody;
-
-
-typedef struct {
-    uint32_t count;
-    RigidBody* objects;
-} World;
-
 
 World* init_world()
 {
@@ -56,38 +38,21 @@ void handle_event(World** world)
     SDL_Event event;
     while(SDL_PollEvent(&event))
     {
-	switch(event.type)
-	{
-	    case SDL_QUIT:
-		state.quit = true;
-		break;
-		
-	    case SDL_KEYDOWN:
-		if (event.key.keysym.sym == SDLK_r) *world = init_world();
-		break;
-	    
-	    default:
-		break;
-	}
+        switch(event.type)
+        {
+            case SDL_QUIT:
+                state.quit = true;
+                break;
+            
+            case SDL_KEYDOWN:
+                if (event.key.keysym.sym == SDLK_r) *world = init_world();
+                break;
+            
+            default:
+                break;
+        }
     }
 }
-
-
-void update(World* world, float dt)
-{
-    for (size_t i = 0; i < world->count; i++)
-    {
-	RigidBody* object = &(world->objects[i]);
-
-	object->velocity.y += 100*dt;
-	if (object->pos.y + object->velocity.y*dt + 10 >= WIN_HEIGHT)
-	{
-	    object->velocity.y *= -.5f;
-	}
-	object->pos.y += object->velocity.y*dt;
-    }
-}
-
 
 void render(World* world)
 {
@@ -95,10 +60,10 @@ void render(World* world)
 
     for (size_t i = 0; i < world->count; i++)
     {
-	RigidBody* object = &(world->objects[i]);
+        RigidBody* object = &(world->objects[i]);
 
-	SDL_Rect rect = {(int) object->pos.x, (int) object->pos.y, 10, 10};
-	SDL_RenderDrawRect(state.renderer, &rect);
+        SDL_Rect rect = {(int) object->pos.x, (int) object->pos.y, 10, 10};
+        SDL_RenderDrawRect(state.renderer, &rect);
     }
 
     SDL_RenderPresent(state.renderer);
@@ -113,17 +78,17 @@ int main(int argc, char **argv)
     ASSERT(!SDL_Init(SDL_INIT_VIDEO), "Cannot initialize SDL : %s\n", SDL_GetError());
 
     state.window = SDL_CreateWindow("SDL Window",
-			    SDL_WINDOWPOS_CENTERED_DISPLAY(0),
-			    SDL_WINDOWPOS_CENTERED_DISPLAY(0),
-			    WIN_WIDTH,
-			    WIN_HEIGHT,
-			    SDL_WINDOW_SHOWN);
+                SDL_WINDOWPOS_CENTERED_DISPLAY(0),
+                SDL_WINDOWPOS_CENTERED_DISPLAY(0),
+                WIN_WIDTH,
+                WIN_HEIGHT,
+                SDL_WINDOW_SHOWN);
 
     ASSERT(state.window, "Failed to create window : %s\n", SDL_GetError());
 
     state.renderer = SDL_CreateRenderer(state.window,
-				-1,
-				SDL_RENDERER_ACCELERATED);
+                -1,
+                SDL_RENDERER_ACCELERATED);
 
     ASSERT(state.renderer, "Failed to create renderer : %s\n", SDL_GetError());
 
@@ -132,12 +97,12 @@ int main(int argc, char **argv)
     uint32_t last_update = SDL_GetTicks();
     while(!state.quit)
     {
-	handle_event(&world);
-	uint32_t current = SDL_GetTicks();
-	float dt = (current - last_update) / 1000.f;
-	last_update = current;
-	update(world, dt);
-	render(world);
+        handle_event(&world);
+        uint32_t current = SDL_GetTicks();
+        float dt = (current - last_update) / 1000.f;
+        last_update = current;
+        update(world, dt);
+        render(world);
     }
 
     SDL_DestroyRenderer(state.renderer);
