@@ -16,18 +16,25 @@ struct {
     bool quit;
 } state;
 
-World* init_world()
+World* default_world()
 {
-    uint32_t count = 2;
+    RigidBody objects[11] = {
+        (RigidBody) {{20, 20}, v2NULL},
+        (RigidBody) {{40, 40}, v2NULL},
+        (RigidBody) {{60, 60}, v2NULL},
+        (RigidBody) {{80, 80}, v2NULL},
+        (RigidBody) {{100, 100}, v2NULL},
+        (RigidBody) {{120, 120}, v2NULL},
+        (RigidBody) {{140, 140}, v2NULL},
+        (RigidBody) {{160, 160}, v2NULL},
+        (RigidBody) {{180, 180}, v2NULL},
+        (RigidBody) {{200, 200}, v2NULL},
+        (RigidBody) {{220, 220}, v2NULL},
+    };
 
-    RigidBody* objects = malloc(count*sizeof(RigidBody));
-
-    objects[0] = (RigidBody) {{10, 20}, {0, 0}};
-    objects[1] = (RigidBody) {{40, 100}, {0, 0}};
-
-    World* world = malloc(sizeof(RigidBody));
-    world->count = count;
-    world->objects = objects;
+    World* world = malloc(sizeof(World));
+    init_world(world);
+    add_objects(world, objects, 11);
 
     return world;
 }
@@ -45,7 +52,7 @@ void handle_event(World** world)
                 break;
             
             case SDL_KEYDOWN:
-                if (event.key.keysym.sym == SDLK_r) *world = init_world();
+                if (event.key.keysym.sym == SDLK_r) *world = default_world();
                 break;
             
             default:
@@ -58,7 +65,7 @@ void render(World* world)
 {
     SDL_SetRenderDrawColor(state.renderer, 255, 0, 0, 255);
 
-    for (size_t i = 0; i < world->count; i++)
+    for (size_t i = 0; i < world->size; i++)
     {
         RigidBody* object = &(world->objects[i]);
 
@@ -92,7 +99,7 @@ int main(int argc, char **argv)
 
     ASSERT(state.renderer, "Failed to create renderer : %s\n", SDL_GetError());
 
-    World* world = init_world();
+    World* world = default_world();
 
     uint32_t last_update = SDL_GetTicks();
     while(!state.quit)
