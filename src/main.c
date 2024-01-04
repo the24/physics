@@ -19,23 +19,14 @@ struct {
 
 World* default_world()
 {
-    RigidBody rigidbodies[11] = {
-        (RigidBody) {{20, 20}, v2NULL},
-        (RigidBody) {{40, 40}, v2NULL},
-        (RigidBody) {{60, 60}, v2NULL},
-        (RigidBody) {{80, 80}, v2NULL},
-        (RigidBody) {{100, 100}, v2NULL},
-        (RigidBody) {{120, 120}, v2NULL},
-        (RigidBody) {{140, 140}, v2NULL},
-        (RigidBody) {{160, 160}, v2NULL},
-        (RigidBody) {{180, 180}, v2NULL},
-        (RigidBody) {{200, 200}, v2NULL},
-        (RigidBody) {{220, 220}, {50, 0}},
+    RigidBody rigidbodies[2] = {
+        (RigidBody) {{100, 200}, {100, 200}, {50, -50}, {0, 0}},
+        (RigidBody) {{200, 100}, {200, 100}, {-50, 50}, {0, 0}},
     };
 
     World* world = malloc(sizeof(World));
     init_world(world);
-    add_rigibodies(world, rigidbodies, 11);
+    add_rigibodies(world, rigidbodies, 2);
 
     return world;
 }
@@ -54,6 +45,10 @@ void handle_event(World** world)
             
             case SDL_KEYDOWN:
                 if (event.key.keysym.sym == SDLK_r) *world = default_world();
+                break;
+
+            case SDL_MOUSEBUTTONDOWN:
+                add_rigidbody(*world, (RigidBody) {{event.button.x, event.button.y}, {event.button.x, event.button.y}, v2NULL, v2NULL});
                 break;
             
             default:

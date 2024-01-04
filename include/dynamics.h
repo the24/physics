@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <math.h>
 
 typedef struct {
     float x;
@@ -20,7 +21,9 @@ typedef struct {
 
 typedef struct {
     v2 pos;
+    v2 prev_pos;
     v2 velocity;
+    v2 acceleration;
 } RigidBody;
 
 typedef struct {
