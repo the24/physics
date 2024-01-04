@@ -4,6 +4,7 @@
 
 #include "SDL2/SDL.h"
 #include "dynamics.h"
+#include "graphics.h"
 
 #define WIN_WIDTH 800
 #define WIN_HEIGHT 600
@@ -18,7 +19,7 @@ struct {
 
 World* default_world()
 {
-    RigidBody objects[11] = {
+    RigidBody rigidbodies[11] = {
         (RigidBody) {{20, 20}, v2NULL},
         (RigidBody) {{40, 40}, v2NULL},
         (RigidBody) {{60, 60}, v2NULL},
@@ -29,12 +30,12 @@ World* default_world()
         (RigidBody) {{160, 160}, v2NULL},
         (RigidBody) {{180, 180}, v2NULL},
         (RigidBody) {{200, 200}, v2NULL},
-        (RigidBody) {{220, 220}, v2NULL},
+        (RigidBody) {{220, 220}, {50, 0}},
     };
 
     World* world = malloc(sizeof(World));
     init_world(world);
-    add_objects(world, objects, 11);
+    add_rigibodies(world, rigidbodies, 11);
 
     return world;
 }
@@ -67,10 +68,9 @@ void render(World* world)
 
     for (size_t i = 0; i < world->size; i++)
     {
-        RigidBody* object = &(world->objects[i]);
+        RigidBody* object = &(world->rigidbodies[i]);
 
-        SDL_Rect rect = {(int) object->pos.x, (int) object->pos.y, 10, 10};
-        SDL_RenderDrawRect(state.renderer, &rect);
+        DrawCircle(state.renderer, object->pos, 10);
     }
 
     SDL_RenderPresent(state.renderer);

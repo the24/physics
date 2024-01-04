@@ -4,8 +4,8 @@
  * 
 */
 
-#ifndef _geometry_h
-#define _geometry_h
+#ifndef _dynamics_h
+#define _dynamics_h
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,12 +26,12 @@ typedef struct {
 typedef struct {
     uint32_t   capacity;
     uint32_t   size;
-    RigidBody* objects;
+    RigidBody* rigidbodies;
 } World;
 
 void update(World* world, float dt);
 void init_world(World* world);
-void add_object(World* world, RigidBody object);
-void add_objects(World* world, RigidBody* objects, uint32_t size);
+void add_rigidbody(World* world, RigidBody rigidbody);
+void add_rigibodies(World* world, RigidBody* rigidbodies, uint32_t size);
 
-#endif /* _geometry_h */
+#endif /* _dynamics_h */
