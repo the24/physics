@@ -13,7 +13,7 @@ ifeq ($(OS),Windows_NT)
 	LDFLAGS += -L lib
 	LDLIBS  += -lmingw32 -lSDL2main -lSDL2
 else
-	LDLIBS += $(shell sdl2-config --libs)
+	LDLIBS += $(shell sdl2-config --libs) -lm
 endif
 
 .PHONY: all dirs

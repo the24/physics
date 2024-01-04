@@ -70,7 +70,7 @@ void render(World* world)
     {
         RigidBody* object = &(world->rigidbodies[i]);
 
-        DrawCircle(state.renderer, object->pos, 10);
+        aa_draw_circle(state.renderer, object->pos, 10);
     }
 
     SDL_RenderPresent(state.renderer);
@@ -98,6 +98,8 @@ int main(int argc, char **argv)
                 SDL_RENDERER_ACCELERATED);
 
     ASSERT(state.renderer, "Failed to create renderer : %s\n", SDL_GetError());
+
+    ASSERT(!SDL_SetRenderDrawBlendMode(state.renderer, SDL_BLENDMODE_BLEND), "Failed to set blend mode : %s\n", SDL_GetError());
 
     World* world = default_world();
 
