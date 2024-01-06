@@ -1,15 +1,19 @@
-# Physique
+# Physics
 
-Trying to recreate a physical engine, with [SDL](https://www.libsdl.org/) in C.
+Trying to recreate a physical engine, in C. Using [SDL](https://www.libsdl.org/) for rendering.
+
+For now, there are only collisions of spherical rigid body.
 
 ## Setting up
 
-### On Windows with Mingw32
+The project is compiled using `gcc` and `make`.
+To switch compiler, change `CC` variable in `Makefile` (not tested).
 
-- Install `gcc` and `make`
-- Download [`SDL2-devel`](https://github.com/libsdl-org/SDL/releases/tag/release-2.28.5) then add `bin` and `lib` folders.
+### For Windows
 
-### On Linux
+Download [`SDL2-devel`](https://github.com/libsdl-org/SDL/releases/tag/release-2.28.5) then add `bin` and `lib` folders to the root of projet.
 
-- Install `gcc` and `make`.
-- Install [`SDL2-devel`](https://github.com/libsdl-org/SDL/releases/tag/release-2.28.5) following `INSTALL.txt` instructions.
+### For Linux
+
+Install `libsdl2-dev` package.
+Or download [`SDL2-devel`](https://github.com/libsdl-org/SDL/releases/tag/release-2.28.5) then follow `INSTALL.txt` instructions.
