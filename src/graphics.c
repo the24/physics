@@ -1,30 +1,30 @@
 #include "graphics.h"
 
-void draw_circle_symetries(SDL_Renderer *renderer, v2 pos, int x, int y)
+void draw_circle_symetries(SDL_Renderer* renderer, v2 center, int x, int y)
 {
-    SDL_RenderDrawPointF(renderer, pos.x + x, pos.y - y);
-    SDL_RenderDrawPointF(renderer, pos.x + x, pos.y + y);
-    SDL_RenderDrawPointF(renderer, pos.x - x, pos.y - y);
-    SDL_RenderDrawPointF(renderer, pos.x - x, pos.y + y);
-    SDL_RenderDrawPointF(renderer, pos.x + y, pos.y - x);
-    SDL_RenderDrawPointF(renderer, pos.x + y, pos.y + x);
-    SDL_RenderDrawPointF(renderer, pos.x - y, pos.y - x);
-    SDL_RenderDrawPointF(renderer, pos.x - y, pos.y + x);
+    SDL_RenderDrawPointF(renderer, center.x + x, center.y - y);
+    SDL_RenderDrawPointF(renderer, center.x + x, center.y + y);
+    SDL_RenderDrawPointF(renderer, center.x - x, center.y - y);
+    SDL_RenderDrawPointF(renderer, center.x - x, center.y + y);
+    SDL_RenderDrawPointF(renderer, center.x + y, center.y - x);
+    SDL_RenderDrawPointF(renderer, center.x + y, center.y + x);
+    SDL_RenderDrawPointF(renderer, center.x - y, center.y - x);
+    SDL_RenderDrawPointF(renderer, center.x - y, center.y + x);
 }
 
-void draw_circle(SDL_Renderer *renderer, v2 pos, uint32_t radius)
+void draw_circle(SDL_Renderer* renderer, v2 center, unsigned int radius)
 {
-    const int32_t diameter = (radius * 2);
+    const int diameter = (radius * 2);
 
-    int32_t x = (radius - 1);
-    int32_t y = 0;
-    int32_t tx = 1;
-    int32_t ty = 1;
-    int32_t error = (tx - diameter);
+    int x = (radius - 1);
+    int y = 0;
+    int tx = 1;
+    int ty = 1;
+    int error = (tx - diameter);
 
     while (x >= y)
     {
-        draw_circle_symetries(renderer, pos, x, y);
+        draw_circle_symetries(renderer, center, x, y);
 
         if (error <= 0)
         {
@@ -42,7 +42,7 @@ void draw_circle(SDL_Renderer *renderer, v2 pos, uint32_t radius)
     }
 }
 
-void aa_draw_circle(SDL_Renderer *renderer, v2 pos, uint32_t radius)
+void aa_draw_circle(SDL_Renderer* renderer, v2 center, unsigned int radius)
 {
     int x = (radius - 1);
     int y = 0;
@@ -63,9 +63,9 @@ void aa_draw_circle(SDL_Renderer *renderer, v2 pos, uint32_t radius)
         last_fade_amount = fade_amount;
 
         SDL_SetRenderDrawColor(renderer, r, g, b, (int) MAX_OPAQUE - fade_amount);
-        draw_circle_symetries(renderer, pos, x, y);
+        draw_circle_symetries(renderer, center, x, y);
         SDL_SetRenderDrawColor(renderer, r, g, b, (int) fade_amount);
-        draw_circle_symetries(renderer, pos, x - 1, y);
+        draw_circle_symetries(renderer, center, x - 1, y);
 
         y++;
     }

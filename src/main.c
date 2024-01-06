@@ -20,8 +20,8 @@ struct {
 World* default_world()
 {
     RigidBody rigidbodies[2] = {
-        (RigidBody) {{100, 200}, {100, 200}, {50, -50}, {0, 0}},
-        (RigidBody) {{200, 100}, {200, 100}, {-50, 50}, {0, 0}},
+        create_rigidbody_v(v2_from_pos(100, 200), v2_from_pos(50, -50)),
+        create_rigidbody_v(v2_from_pos(200, 100), v2_from_pos(-50, 50)),
     };
 
     World* world = malloc(sizeof(World));
@@ -31,29 +31,30 @@ World* default_world()
     return world;
 }
 
-
-void handle_event(World** world)
+void reset_world(World** world)
 {
-    SDL_Event event;
-    while(SDL_PollEvent(&event))
-    {
-        switch(event.type)
-        {
-            case SDL_QUIT:
-                state.quit = true;
-                break;
-            
-            case SDL_KEYDOWN:
-                if (event.key.keysym.sym == SDLK_r) *world = default_world();
-                break;
+    *world = default_world();
+}
 
-            case SDL_MOUSEBUTTONDOWN:
-                add_rigidbody(*world, (RigidBody) {{event.button.x, event.button.y}, {event.button.x, event.button.y}, v2NULL, v2NULL});
-                break;
-            
-            default:
-                break;
-        }
+void handle_event(World* world, SDL_Event event)
+{
+    switch(event.type)
+    {
+        case SDL_QUIT:
+            state.quit = true;
+            break;
+        
+        case SDL_KEYDOWN:
+            if (event.key.keysym.sym == SDLK_r) reset_world(&world);
+            break;
+
+        case SDL_MOUSEBUTTONUP:
+            add_rigidbody(world, create_rigidbody_at_pos(v2_from_pos(event.button.x,
+                                                                     WIN_HEIGHT - event.button.y)));
+            break;
+        
+        default:
+            break;
     }
 }
 
@@ -61,11 +62,13 @@ void render(World* world)
 {
     SDL_SetRenderDrawColor(state.renderer, 255, 0, 0, 255);
 
-    for (size_t i = 0; i < world->size; i++)
+    for (unsigned int i = 0; i < world->size; i++)
     {
         RigidBody* object = &(world->rigidbodies[i]);
 
-        aa_draw_circle(state.renderer, object->pos, 10);
+        aa_draw_circle(state.renderer,
+                       v2_from_pos(object->pos.x, WIN_HEIGHT - object->pos.y),
+                       10);
     }
 
     SDL_RenderPresent(state.renderer);
@@ -79,7 +82,7 @@ int main(int argc, char **argv)
 {
     ASSERT(!SDL_Init(SDL_INIT_VIDEO), "Cannot initialize SDL : %s\n", SDL_GetError());
 
-    state.window = SDL_CreateWindow("SDL Window",
+    state.window = SDL_CreateWindow("Phisics",
                 SDL_WINDOWPOS_CENTERED_DISPLAY(0),
                 SDL_WINDOWPOS_CENTERED_DISPLAY(0),
                 WIN_WIDTH,
@@ -101,7 +104,9 @@ int main(int argc, char **argv)
     uint32_t last_update = SDL_GetTicks();
     while(!state.quit)
     {
-        handle_event(&world);
+        SDL_Event event;
+        while(SDL_PollEvent(&event)) handle_event(world, event);
+
         uint32_t current = SDL_GetTicks();
         float dt = (current - last_update) / 1000.f;
         last_update = current;
