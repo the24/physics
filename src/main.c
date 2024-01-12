@@ -14,6 +14,10 @@
 struct {
     SDL_Window* window;
     SDL_Renderer* renderer;
+
+    v2 click_pos;
+    v2 mouse_pos;
+
     bool quit;
 } state;
 
@@ -36,6 +40,11 @@ void reset_world(World** world)
     *world = default_world();
 }
 
+v2 project_to_world(v2 pos)
+{
+    return v2_from_pos(pos.x, WIN_HEIGHT - pos.y);
+}
+
 void handle_event(World* world, SDL_Event event)
 {
     switch(event.type)
@@ -48,9 +57,22 @@ void handle_event(World* world, SDL_Event event)
             if (event.key.keysym.sym == SDLK_r) reset_world(&world);
             break;
 
+        case SDL_MOUSEBUTTONDOWN:
+            state.click_pos = v2_from_pos(event.button.x, event.button.y);
+            break;
+        
+        case SDL_MOUSEMOTION:
+            state.mouse_pos = v2_from_pos(event.button.x, event.button.y);
+            break;
+
         case SDL_MOUSEBUTTONUP:
-            add_rigidbody(world, create_rigidbody_at_pos(v2_from_pos(event.button.x,
-                                                                     WIN_HEIGHT - event.button.y)));
+            if (state.click_pos.x != -1, state.click_pos.y != -1)
+            {
+                add_rigidbody(world, create_rigidbody_v(project_to_world(state.click_pos),
+                                                        sub_v2(project_to_world(state.mouse_pos), project_to_world(state.click_pos))));
+                state.click_pos = v2_from_pos(-1, -1);
+            }
+            else add_rigidbody(world, create_rigidbody_at_pos(project_to_world(state.click_pos)));
             break;
         
         default:
@@ -62,12 +84,23 @@ void render(World* world)
 {
     SDL_SetRenderDrawColor(state.renderer, 255, 0, 0, 255);
 
+    if (state.click_pos.x != -1 && state.click_pos.y != -1)
+    {
+        aa_draw_circle(state.renderer,
+                       state.click_pos,
+                       10);
+        
+        SDL_RenderDrawLineF(state.renderer,
+                            state.click_pos.x, state.click_pos.y,
+                            state.mouse_pos.x, state.mouse_pos.y);
+    }
+
     for (unsigned int i = 0; i < world->size; i++)
     {
         RigidBody* object = &(world->rigidbodies[i]);
 
         aa_draw_circle(state.renderer,
-                       v2_from_pos(object->pos.x, WIN_HEIGHT - object->pos.y),
+                       project_to_world(object->pos),
                        10);
     }
 
@@ -82,7 +115,7 @@ int main(int argc, char **argv)
 {
     ASSERT(!SDL_Init(SDL_INIT_VIDEO), "Cannot initialize SDL : %s\n", SDL_GetError());
 
-    state.window = SDL_CreateWindow("Phisics",
+    state.window = SDL_CreateWindow("physics",
                 SDL_WINDOWPOS_CENTERED_DISPLAY(0),
                 SDL_WINDOWPOS_CENTERED_DISPLAY(0),
                 WIN_WIDTH,
@@ -98,6 +131,9 @@ int main(int argc, char **argv)
     ASSERT(state.renderer, "Failed to create renderer : %s\n", SDL_GetError());
 
     ASSERT(!SDL_SetRenderDrawBlendMode(state.renderer, SDL_BLENDMODE_BLEND), "Failed to set blend mode : %s\n", SDL_GetError());
+
+    state.click_pos = v2_from_pos(-1, -1);
+    state.mouse_pos = v2_from_pos(-1, -1);
 
     World* world = default_world();
 
