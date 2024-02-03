@@ -66,7 +66,7 @@ void handle_event(World* world, SDL_Event event)
             break;
 
         case SDL_MOUSEBUTTONUP:
-            if (state.click_pos.x != -1, state.click_pos.y != -1)
+            if (state.click_pos.x != -1 && state.click_pos.y != -1)
             {
                 add_rigidbody(world, create_rigidbody_v(project_to_world(state.click_pos),
                                                         sub_v2(project_to_world(state.mouse_pos), project_to_world(state.click_pos))));
@@ -113,6 +113,9 @@ void render(World* world)
 
 int main(int argc, char **argv)
 {
+    (void) argc;
+    (void) argv;
+
     ASSERT(!SDL_Init(SDL_INIT_VIDEO), "Cannot initialize SDL : %s\n", SDL_GetError());
 
     state.window = SDL_CreateWindow("physics",
@@ -137,16 +140,17 @@ int main(int argc, char **argv)
 
     World* world = default_world();
 
-    uint32_t last_update = SDL_GetTicks();
+    uint64_t last_update = SDL_GetPerformanceCounter();
     while(!state.quit)
     {
         SDL_Event event;
         while(SDL_PollEvent(&event)) handle_event(world, event);
 
-        uint32_t current = SDL_GetTicks();
-        float dt = (current - last_update) / 1000.f;
+        uint64_t current = SDL_GetPerformanceCounter();
+        float dt = (current - last_update) / (float) SDL_GetPerformanceFrequency();
         last_update = current;
-        update(world, dt);
+
+        update(world, 1, dt);
         render(world);
     }
 

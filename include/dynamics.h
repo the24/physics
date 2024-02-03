@@ -50,7 +50,7 @@ typedef struct {
     RigidBody*   rigidbodies;
 } World;
 
-void update(World* world, float dt);
+void update(World* world, unsigned int substep, float dt);
 void init_world(World* world);
 
 void add_rigidbody(World* world, RigidBody rigidbody);

@@ -33,7 +33,7 @@ v2 scale_v2(v2 u, float lambda)
 }
 
 
-void check_collisions(World* world)
+void solve_collisions(World* world, float dt)
 {
     for (unsigned int i = 0; i < world->size; i++)
     {
@@ -53,17 +53,14 @@ void check_collisions(World* world)
             translate_rigidbody(object_1, scale_v2(dir, -delta/(2*dist)));
             translate_rigidbody(object_2, scale_v2(dir, delta/(2*dist)));
 
-            float vx = object_1->velocity.x;
-            object_1->velocity.x = object_2->velocity.x;
-            object_2->velocity.x = vx;
-            float vy = object_1->velocity.y;
-            object_1->velocity.y = object_2->velocity.y;
-            object_2->velocity.y = vy;
+	    v2 v_1 = object_1->velocity;
+	    object_1->prev_pos = sub_v2(object_1->pos, scale_v2(object_2->velocity, dt));
+	    object_2->prev_pos = sub_v2(object_2->pos, scale_v2(v_1, dt));
         }
     }
 }
 
-void check_constraint(World* world)
+void solve_constraint(World* world, float dt)
 {
     for (unsigned int i = 0; i < world->size; i++)
     {
@@ -72,15 +69,15 @@ void check_constraint(World* world)
         if (object->pos.y - 10 < 0)
         {
             object->pos.y = 10;
-            object->velocity.y *= -.75f;
+	    // object->prev_pos.y = 2*object->pos.y - object->prev_pos.y;
         } else if (object->pos.x + 10 > 800)
         {
             object->pos.x = 800 - 10;
-            object->velocity.x *= -.75f;
+	    object->prev_pos.x = 2*object->pos.x - object->prev_pos.x;
         } else if (object->pos.x - 10 < 0)
         {
             object->pos.x = 10;
-            object->velocity.x *= -.75f;
+	    object->prev_pos.x = 2*object->pos.x - object->prev_pos.x;
         }
     }
 }
@@ -132,20 +129,40 @@ void accelerate_rigidbody(RigidBody* rigidbody, v2 acceleration)
 }
 
 
-void update(World* world, float dt)
+void update(World* world, unsigned int substep, float dt)
 {
-    check_constraint(world);
-    check_collisions(world);
+    float dt_substep = dt / substep;
 
-    for (unsigned int i = 0; i < world->size; i++)
+    for (unsigned int i = 0; i < substep; i++)
     {
-        RigidBody* object = &(world->rigidbodies[i]);
+	for (unsigned int i = 0; i < world->size; i++)
+	{
+	    RigidBody* object = &(world->rigidbodies[i]);
 
-        // gravity
-        object->velocity.y -= 100*dt;
-        
-        object->prev_pos = object->pos;
-        translate_rigidbody(object, scale_v2(object->velocity, dt));
+	    v2 f_ext = v2_from_pos(0, -100);
+	    float mass = 10;
+
+	    object->prev_pos = object->pos;
+	    object->velocity = add_v2(object->velocity, scale_v2(f_ext, dt_substep/mass));
+	    translate_rigidbody(object, scale_v2(object->velocity, dt_substep));
+	}
+
+	// Solve constraint
+	solve_constraint(world, dt_substep);
+	solve_collisions(world, dt_substep);
+
+	// Update velocity
+	for (unsigned int i = 0; i < world->size; i++)
+	{
+	    RigidBody* object = &(world->rigidbodies[i]);
+	    if (dt_substep == 0.0f)
+	    {
+		printf("Mhhhh\n");
+		exit(1);
+	    }
+	    object->velocity.x = (object->pos.x - object->prev_pos.x)/dt_substep;
+	    object->velocity.y = (object->pos.y - object->prev_pos.y)/dt_substep;
+	}
     }
 }
 
