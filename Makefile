@@ -6,14 +6,13 @@ SRCS = $(wildcard src/*.c)
 OBJS = $(SRCS:%.c=$(BIN)/%.o)
 
 CFLAGS  = -g -Wall -Wextra -I include
-LDFLAGS = 
-LDLIBS  = 
+LDFLAGS = -Llib 
+LDLIBS  = -lSDL2main -lSDL2
 
 ifeq ($(OS),Windows_NT)
-	LDFLAGS += -L lib
-	LDLIBS  += -lmingw32 -lSDL2main -lSDL2
+	LDLIBS  += -lmingw32 
 else
-	LDLIBS += $(shell sdl2-config --libs) -lm
+	LDLIBS += -lm
 endif
 
 .PHONY: all dirs
