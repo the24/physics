@@ -5,7 +5,7 @@ NAME = main
 SRCS = $(wildcard src/*.c)
 OBJS = $(SRCS:%.c=$(BIN)/%.o)
 
-CFLAGS  = -g -Wall -Wextra -I include
+CFLAGS  = -g -Wall -Wextra -Iinclude -ISDL/include
 LDFLAGS = -Llib 
 LDLIBS  = -lSDL2main -lSDL2
 
